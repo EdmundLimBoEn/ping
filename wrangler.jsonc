@@ -24,7 +24,7 @@
 		{
 			"binding": "DB",
 			"database_name": "ping",
-			"database_id": "00000000-0000-4000-8000-000000000000", // replace after `npx wrangler d1 create ping`
+			"database_id": "480c8082-276a-4c73-8c37-0ec915714dbf", // replace after `npx wrangler d1 create ping`
 			"migrations_dir": "migrations",
 		},
 	],
