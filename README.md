@@ -22,10 +22,9 @@ You need a free Cloudflare account and Wrangler login.
 ```bash
 npm install
 npx wrangler login
-npx wrangler d1 create ping
 ```
 
-Copy the printed `database_id` into `wrangler.jsonc` in place of `00000000-0000-4000-8000-000000000000`.
+`wrangler.jsonc` already points at the production D1 database `ping` (`480c8082-276a-4c73-8c37-0ec915714dbf`). Local D1 is separate and is created by `npm run migrate:local`.
 
 ```bash
 cp .dev.vars.example .dev.vars
