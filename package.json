@@ -1,0 +1,25 @@
+{
+	"name": "ping",
+	"version": "0.1.0",
+	"private": true,
+	"type": "module",
+	"scripts": {
+		"dev": "wrangler dev --port 43123 --ip 127.0.0.1",
+		"start": "wrangler dev --port 43123 --ip 127.0.0.1",
+		"deploy": "wrangler deploy",
+		"deploy:dry-run": "wrangler deploy --dry-run --outdir dist",
+		"test": "vitest run",
+		"test:watch": "vitest",
+		"types": "wrangler types",
+		"migrate:local": "wrangler d1 migrations apply ping --local",
+		"migrate:remote": "wrangler d1 migrations apply ping --remote",
+		"mint": "node scripts/mint-bot-key.mjs"
+	},
+	"devDependencies": {
+		"@cloudflare/vitest-plugin": "1.4.3",
+		"typescript": "5.9.3",
+		"vite": "^7.1.12",
+		"vitest": "5.0.5",
+		"wrangler": "^4.151.0"
+	}
+}

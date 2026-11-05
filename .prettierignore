@@ -1,0 +1,5 @@
+worker-configuration.d.ts
+dist
+.wrangler
+node_modules
+ios

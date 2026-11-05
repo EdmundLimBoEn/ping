@@ -1,0 +1,22 @@
+{
+	"$schema": "node_modules/wrangler/config-schema.json",
+	"name": "ping",
+	"main": "src/index.ts",
+	"compatibility_date": "2026-10-19",
+	"observability": {
+		"enabled": true,
+		"logs": { "enabled": true, "head_sampling_rate": 1 },
+		"traces": { "enabled": true, "head_sampling_rate": 1 },
+	},
+	"vars": {
+		"APNS_BUNDLE_ID": "co.sillyapps.ping",
+	},
+	"d1_databases": [
+		{
+			"binding": "DB",
+			"database_name": "ping",
+			"database_id": "00000000-0000-4000-8000-000000000000", // replace after `npx wrangler d1 create ping`
+			"migrations_dir": "migrations",
+		},
+	],
+}

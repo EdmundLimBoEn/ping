@@ -1,0 +1,17 @@
+# Copy to .dev.vars for local wrangler dev. Never commit .dev.vars.
+# Generate owner and pepper with: openssl rand -base64 32
+
+OWNER_SECRET=replace-with-openssl-rand-base64-32
+BOT_KEY_PEPPER=replace-with-a-different-openssl-rand-base64-32
+
+# Local wrangler cannot speak HTTP/2 to Apple. Keep this 1 until the Worker is deployed.
+APNS_DRY_RUN=1
+
+# From Apple Developer > Keys > your APNs AuthKey.
+APNS_KEY_ID=XXXXXXXXXX
+APNS_TEAM_ID=XXXXXXXXXX
+
+# Paste the .p8 contents, including BEGIN/END lines. Quoted multiline works in .dev.vars.
+APNS_P8="-----BEGIN PRIVATE KEY-----
+REPLACE_WITH_AUTHKEY_P8_CONTENTS
+-----END PRIVATE KEY-----"
