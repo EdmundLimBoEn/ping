@@ -12,7 +12,7 @@ struct SettingsView: View {
 		NavigationStack {
 			Form {
 				Section("Worker") {
-					TextField("https://ping.YOUR_SUBDOMAIN.workers.dev", text: $store.baseURLString)
+					TextField("https://api-ping.sillyapps.co", text: $store.baseURLString)
 						.keyboardType(.URL)
 						.textInputAutocapitalization(.never)
 						.autocorrectionDisabled()
