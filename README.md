@@ -2,7 +2,9 @@
 
 Personal bot-to-iPhone push for Edmund Lim. A Cloudflare Worker accepts `POST /notify` from bots such as steve, stores a thin inbox in D1, and sends APNs alerts to phones registered by the Ping iOS app.
 
-This repo is the Worker, the D1 schema, and a SwiftUI app with bundle id `co.sillyapps.ping`. v1 uses a `*.workers.dev` URL. There is no Android client and no custom domain.
+This repo is the Worker, the D1 schema, and a SwiftUI app with bundle id `co.sillyapps.ping`. There is no Android client.
+
+The production API hostname is **`https://api-ping.sillyapps.co`**. `wrangler.jsonc` attaches that hostname as a Workers Custom Domain and keeps the `*.workers.dev` URL as a fallback (`workers_dev: true`). `ping.sillyapps.co` is reserved for a later landing page and is not routed in this pass.
 
 ## How it fits together
 
@@ -87,7 +89,7 @@ export STEVE_BOT_SECRET='png_…'
 export PING_URL='http://127.0.0.1:43123'
 ```
 
-After deploy, set `PING_URL` to `https://ping.<your-subdomain>.workers.dev`.
+After deploy, set `PING_URL` to `https://api-ping.sillyapps.co`. Until the custom domain is live, you can use the `https://ping.<your-subdomain>.workers.dev` fallback that Wrangler prints.
 
 ## Run the Worker locally
 
@@ -131,7 +133,7 @@ curl -sS "$PING_URL/inbox" \
 1. Open `ios/Ping/Ping.xcodeproj` on a Mac.
 2. Set the Team on the Ping target. Keep bundle id `co.sillyapps.ping` unless you also change `APNS_BUNDLE_ID`.
 3. Run on a physical iPhone. The simulator does not receive APNs.
-4. In Settings, paste `https://ping.<your-subdomain>.workers.dev` and the `OWNER_SECRET` value.
+4. In Settings, paste `https://api-ping.sillyapps.co` (or the `*.workers.dev` fallback) and the `OWNER_SECRET` value.
 5. Tap Enable notifications and accept the system prompt.
 6. Confirm `POST /devices` succeeded. The status line should read `Registered sandbox` for a Debug build.
 
@@ -146,9 +148,26 @@ npx wrangler deploy
 npx wrangler d1 migrations apply ping --remote
 ```
 
-Wrangler prints `https://ping.<your-subdomain>.workers.dev`. Point the iOS app at that URL. Mint steve against `--apply-remote` if you have not already.
+`wrangler.jsonc` is already set to:
 
-A successful `wrangler deploy --dry-run` only proves the Worker bundles. It does not prove APNs or D1.
+- Custom Domain `api-ping.sillyapps.co` (the Worker is the origin; Cloudflare issues the certificate)
+- `workers_dev: true`, so `https://ping.<your-subdomain>.workers.dev` stays up as a fallback
+
+Attach the `sillyapps.co` zone in the Cloudflare dashboard separately (DNS is not created from this repo). Then `npx wrangler deploy` binds `api-ping.sillyapps.co`. If that hostname already has a CNAME, delete the CNAME first — a Custom Domain cannot sit on an existing CNAME.
+
+Point the iOS app at `https://api-ping.sillyapps.co`. Use the printed `*.workers.dev` URL only if the custom domain is not live yet. Mint steve against `--apply-remote` if you have not already.
+
+A successful `wrangler deploy --dry-run` only proves the Worker bundles. It does not prove APNs, D1, or DNS.
+
+## Hostnames
+
+| Hostname | Role |
+| --- | --- |
+| `https://api-ping.sillyapps.co` | Production Worker API (this pass) |
+| `https://ping.<your-subdomain>.workers.dev` | Fallback while DNS is attached |
+| `ping.sillyapps.co` | Landing page later — do not route the Worker here |
+
+Local `wrangler dev` still binds `http://127.0.0.1:43123`.
 
 ## TestFlight later
 

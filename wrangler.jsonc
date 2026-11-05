@@ -3,6 +3,15 @@
 	"name": "ping",
 	"main": "src/index.ts",
 	"compatibility_date": "2026-10-19",
+	// Custom Domain for the API. DNS for sillyapps.co is attached in Cloudflare separately.
+	// Wrangler disables workers.dev when routes are set unless this stays true.
+	"workers_dev": true,
+	"routes": [
+		{
+			"pattern": "api-ping.sillyapps.co",
+			"custom_domain": true,
+		},
+	],
 	"observability": {
 		"enabled": true,
 		"logs": { "enabled": true, "head_sampling_rate": 1 },
