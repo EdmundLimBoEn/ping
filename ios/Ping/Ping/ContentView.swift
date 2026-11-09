@@ -12,9 +12,10 @@ struct ContentView: View {
 				.tabItem { Label("Settings", systemImage: "gear") }
 		}
 		.task {
-			await push.start { token in
+			push.onToken = { token in
 				Task { await store.register(tokenHex: token) }
 			}
+			await push.refreshAuthorization()
 			if store.client != nil {
 				await store.refresh()
 			}
