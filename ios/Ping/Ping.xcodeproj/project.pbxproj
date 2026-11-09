@@ -18,7 +18,26 @@
 		1A0000000000000000000209 /* InboxView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1A0000000000000000000109 /* InboxView.swift */; };
 		1A000000000000000000020A /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1A000000000000000000010A /* SettingsView.swift */; };
 		1A000000000000000000020B /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 1A000000000000000000010B /* Assets.xcassets */; };
+		1B0000000000000000000001 /* PushControllerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1B0000000000000000000002 /* PushControllerTests.swift */; };
 /* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		1B0000000000000000000008 = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 1A0000000000000000000001;
+			proxyType = 1;
+			remoteGlobalIDString = 1A0000000000000000000002;
+			remoteInfo = Ping;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXTargetDependency section */
+		1B0000000000000000000007 = {
+			isa = PBXTargetDependency;
+			target = 1A0000000000000000000002;
+			targetProxy = 1B0000000000000000000008;
+		};
+/* End PBXTargetDependency section */
 
 /* Begin PBXFileReference section */
 		1A0000000000000000000003 /* Ping.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Ping.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -35,6 +54,8 @@
 		1A000000000000000000010B /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		1A000000000000000000010C /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		1A000000000000000000010D /* Ping.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = Ping.entitlements; sourceTree = "<group>"; };
+		1B0000000000000000000002 /* PushControllerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PingTests/PushControllerTests.swift; sourceTree = "<group>"; };
+		1B0000000000000000000003 /* PingTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = PingTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -72,6 +93,7 @@
 			isa = PBXGroup;
 			children = (
 				1A0000000000000000000003 /* Ping.app */,
+				1B0000000000000000000003 /* PingTests.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -80,6 +102,7 @@
 			isa = PBXGroup;
 			children = (
 				1A0000000000000000000020 /* Ping */,
+				1B0000000000000000000002 /* PushControllerTests.swift */,
 				1A0000000000000000000021 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -103,6 +126,17 @@
 			productName = Ping;
 			productReference = 1A0000000000000000000003 /* Ping.app */;
 			productType = "com.apple.product-type.application";
+		};
+		1B0000000000000000000004 /* PingTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 1B0000000000000000000005;
+			buildPhases = (1B0000000000000000000006,);
+			buildRules = ();
+			dependencies = (1B0000000000000000000007,);
+			name = PingTests;
+			productName = PingTests;
+			productReference = 1B0000000000000000000003;
+			productType = "com.apple.product-type.bundle.unit-test";
 		};
 /* End PBXNativeTarget section */
 
@@ -133,6 +167,7 @@
 			projectRoot = "";
 			targets = (
 				1A0000000000000000000002 /* Ping */,
+				1B0000000000000000000004 /* PingTests */,
 			);
 		};
 /* End PBXProject section */
@@ -164,6 +199,12 @@
 				1A0000000000000000000209 /* InboxView.swift in Sources */,
 				1A000000000000000000020A /* SettingsView.swift in Sources */,
 			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		1B0000000000000000000006 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (1B0000000000000000000001 /* PushControllerTests.swift in Sources */,);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXSourcesBuildPhase section */
@@ -274,6 +315,37 @@
 			};
 			name = Release;
 		};
+		1B0000000000000000000009 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				PRODUCT_BUNDLE_IDENTIFIER = co.sillyapps.ping.tests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 1;
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Ping.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/Ping";
+			};
+			name = Debug;
+		};
+		1B000000000000000000000A /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				PRODUCT_BUNDLE_IDENTIFIER = co.sillyapps.ping.tests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 1;
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Ping.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/Ping";
+			};
+			name = Release;
+		};
+
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -292,6 +364,12 @@
 				1A0000000000000000000032 /* Debug */,
 				1A0000000000000000000033 /* Release */,
 			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		1B0000000000000000000005 /* Build configuration list for PingTests */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (1B0000000000000000000009, 1B000000000000000000000A,);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
