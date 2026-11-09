@@ -82,7 +82,7 @@ struct SettingsView: View {
 			}
 			.navigationTitle("Settings")
 			.onAppear(perform: loadQuietFromPrefs)
-			.onChange(of: store.prefs) { _, _ in
+			.onChange(of: store.prefs.quiet) { _, _ in
 				loadQuietFromPrefs()
 			}
 		}
