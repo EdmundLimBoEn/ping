@@ -1,4 +1,4 @@
-import { sendAlert } from "./apns";
+import { sendAlert, type ApnsResult } from "./apns";
 import { notifySecret, requireOwner, resolveBot } from "./auth";
 import {
 	deleteDevice,
@@ -98,18 +98,25 @@ async function notify(request: Request, env: Env): Promise<Response> {
 	} else {
 		const dryRun = env.APNS_DRY_RUN === "1";
 		for (const device of devices) {
-			const result = await sendAlert({
-				p8: env.APNS_P8,
-				keyId: env.APNS_KEY_ID,
-				teamId: env.APNS_TEAM_ID,
-				bundleId: env.APNS_BUNDLE_ID,
-				environment: device.environment,
-				deviceToken: device.token,
-				title,
-				body: bodyText,
-				tag,
-				dryRun,
-			});
+			let result: ApnsResult;
+			try {
+				result = await sendAlert({
+					p8: env.APNS_P8,
+					keyId: env.APNS_KEY_ID,
+					teamId: env.APNS_TEAM_ID,
+					bundleId: env.APNS_BUNDLE_ID,
+					environment: device.environment,
+					deviceToken: device.token,
+					title,
+					body: bodyText,
+					tag,
+					dryRun,
+				});
+			} catch {
+				failed += 1;
+				console.error(JSON.stringify({ msg: "apns_transport_failed" }));
+				continue;
+			}
 			if (result.ok) {
 				sent += 1;
 			} else {
