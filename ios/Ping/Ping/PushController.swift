@@ -7,34 +7,10 @@ final class PushController: ObservableObject {
 	@Published var authorization: UNAuthorizationStatus = .notDetermined
 	@Published var lastError: String?
 	var onToken: ((String) -> Void)?
-	private let authorizationStatus: @MainActor () async -> UNAuthorizationStatus
-	private let registerForRemoteNotifications: @MainActor () -> Void
-
-	init(
-		authorizationStatus: @escaping @MainActor () async -> UNAuthorizationStatus = {
-			await UNUserNotificationCenter.current().notificationSettings().authorizationStatus
-		},
-		registerForRemoteNotifications: @escaping @MainActor () -> Void = {
-			UIApplication.shared.registerForRemoteNotifications()
-		}
-	) {
-		self.authorizationStatus = authorizationStatus
-		self.registerForRemoteNotifications = registerForRemoteNotifications
-	}
-
-	func start(onToken: @escaping (String) -> Void) async {
-		self.onToken = onToken
-		await refreshAuthorization()
-		switch authorization {
-		case .authorized, .provisional, .ephemeral:
-			registerForRemoteNotifications()
-		default:
-			break
-		}
-	}
 
 	func refreshAuthorization() async {
-		authorization = await authorizationStatus()
+		let settings = await UNUserNotificationCenter.current().notificationSettings()
+		authorization = settings.authorizationStatus
 	}
 
 	func requestAndRegister() async {
@@ -44,7 +20,7 @@ final class PushController: ObservableObject {
 				.requestAuthorization(options: [.alert, .sound, .badge])
 			await refreshAuthorization()
 			if granted {
-				registerForRemoteNotifications()
+				UIApplication.shared.registerForRemoteNotifications()
 			} else {
 				lastError = "[PLACEHOLDER: notifications were denied]"
 			}
