@@ -8,6 +8,7 @@ type JwtCache = { token: string; iat: number };
 
 const jwtCache = new Map<string, JwtCache>();
 const JWT_TTL_SECONDS = 50 * 60;
+const APNS_PAYLOAD_MAX_BYTES = 4096;
 
 export async function sendAlert(options: {
 	p8: string;
@@ -37,6 +38,26 @@ export async function sendAlert(options: {
 		},
 		tag: options.tag ?? undefined,
 	};
+	const encoder = new TextEncoder();
+	let serialized = JSON.stringify(payload);
+	if (encoder.encode(serialized).byteLength > APNS_PAYLOAD_MAX_BYTES) {
+		// Validated title/tag limits leave room for the body. Keep the longest
+		// prefix that fits the complete JSON payload, without splitting code points.
+		const characters = Array.from(options.body);
+		let low = 0;
+		let high = characters.length;
+		while (low < high) {
+			const mid = Math.ceil((low + high) / 2);
+			payload.aps.alert.body = characters.slice(0, mid).join("");
+			if (encoder.encode(JSON.stringify(payload)).byteLength <= APNS_PAYLOAD_MAX_BYTES) {
+				low = mid;
+			} else {
+				high = mid - 1;
+			}
+		}
+		payload.aps.alert.body = characters.slice(0, low).join("");
+		serialized = JSON.stringify(payload);
+	}
 
 	const response = await fetch(`${host}/3/device/${options.deviceToken}`, {
 		method: "POST",
@@ -47,7 +68,7 @@ export async function sendAlert(options: {
 			"apns-priority": "10",
 			"content-type": "application/json",
 		},
-		body: JSON.stringify(payload),
+		body: serialized,
 	});
 
 	const apnsId = response.headers.get("apns-id") ?? "";
