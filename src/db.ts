@@ -1,7 +1,7 @@
 import { HttpError } from "./http";
 import { decideDelivery, formatClock, isValidTag, parseClock, type Prefs } from "./delivery";
 
-export type DeviceRow = { token: string; environment: "sandbox" | "production" };
+export type DeviceRow = { token: string; environment: "sandbox" | "production"; updated_at: number };
 
 export type PrefsRow = {
 	muted: number;
@@ -79,10 +79,12 @@ export async function upsertDevice(
 	environment: "sandbox" | "production",
 	now: number,
 ): Promise<void> {
+	// Give every refresh a distinct timestamp, even within the same millisecond.
 	await db
 		.prepare(
 			`INSERT INTO devices (token, environment, updated_at) VALUES (?, ?, ?)
-			 ON CONFLICT(token) DO UPDATE SET environment = excluded.environment, updated_at = excluded.updated_at`,
+			 ON CONFLICT(token) DO UPDATE SET environment = excluded.environment,
+			 updated_at = MAX(excluded.updated_at, devices.updated_at + 1)`,
 		)
 		.bind(token, environment, now)
 		.run();
@@ -92,8 +94,15 @@ export async function deleteDevice(db: D1Database, token: string): Promise<void>
 	await db.prepare("DELETE FROM devices WHERE token = ?").bind(token).run();
 }
 
+export async function deleteDeviceIfUnchanged(db: D1Database, device: DeviceRow): Promise<void> {
+	await db
+		.prepare("DELETE FROM devices WHERE token = ? AND environment = ? AND updated_at = ?")
+		.bind(device.token, device.environment, device.updated_at)
+		.run();
+}
+
 export async function listDevices(db: D1Database): Promise<DeviceRow[]> {
-	const result = await db.prepare("SELECT token, environment FROM devices").all<DeviceRow>();
+	const result = await db.prepare("SELECT token, environment, updated_at FROM devices").all<DeviceRow>();
 	return result.results ?? [];
 }
 

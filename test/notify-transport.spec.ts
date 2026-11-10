@@ -7,7 +7,7 @@ import worker from "../src/index";
 const SECRET = "transport-test-secret";
 const TOKENS = ["ab", "cd", "ef"].map((value) => value.repeat(32));
 
-describe("notify transport failures", () => {
+describe("notify APNs failures", () => {
 	let p8: string;
 	beforeAll(async () => {
 		const keyPair = await crypto.subtle.generateKey(
@@ -38,6 +38,66 @@ describe("notify transport failures", () => {
 	});
 
 	afterEach(() => vi.restoreAllMocks());
+
+	it.each([
+		{ scenario: "corrected environment", environment: "production", elapsed: 0 },
+		{ scenario: "refreshed timestamp", environment: "sandbox", elapsed: 1000 },
+		{ scenario: "refresh in the same millisecond", environment: "sandbox", elapsed: 0 },
+		{ scenario: "unchanged registration", environment: null, elapsed: 0 },
+	])("only removes an invalid registration if unchanged: $scenario", async ({ environment, elapsed }) => {
+		const registeredAt = 1_800_000_000_000;
+		await env.DB.prepare("UPDATE devices SET updated_at = ?").bind(registeredAt).run();
+		const started = Promise.withResolvers<void>();
+		const rejection = Promise.withResolvers<Response>();
+		const fetchMock = vi.spyOn(globalThis, "fetch").mockImplementation(async (input) => {
+			if (String(input).endsWith(`/3/device/${TOKENS[0]}`)) {
+				started.resolve();
+				return rejection.promise;
+			}
+			return new Response(null, { status: 200 });
+		});
+		const pending = worker.fetch(
+			new Request("https://ping.test/notify", {
+				method: "POST",
+				headers: { authorization: `Bearer ${SECRET}`, "content-type": "application/json" },
+				body: JSON.stringify({ title: "build", body: "green" }),
+			}),
+			{ ...env, APNS_P8: p8, APNS_KEY_ID: "TRANSPORT", APNS_DRY_RUN: "0" },
+		);
+		await started.promise;
+		try {
+			if (environment) {
+				vi.spyOn(Date, "now").mockReturnValue(registeredAt + elapsed);
+				const response = await worker.fetch(
+					new Request("https://ping.test/devices", {
+						method: "POST",
+						headers: { authorization: `Bearer ${env.OWNER_SECRET}`, "content-type": "application/json" },
+						body: JSON.stringify({ token: TOKENS[0], environment }),
+					}),
+					env,
+				);
+				expect(response.status).toBe(200);
+			}
+		} finally {
+			rejection.resolve(new Response(JSON.stringify({ reason: "BadDeviceToken" }), { status: 400 }));
+			await pending;
+		}
+		const response = await pending;
+		expect(response.status).toBe(200);
+		expect(await response.json()).toMatchObject({ sent: 2, failed: 1, push: "sent" });
+		expect(fetchMock).toHaveBeenCalledWith(
+			`https://api.sandbox.push.apple.com/3/device/${TOKENS[0]}`,
+			expect.any(Object),
+		);
+		const devices = await listDevices(env.DB);
+		expect(devices).toHaveLength(environment ? 3 : 2);
+		const refreshed = devices.find((device) => device.token === TOKENS[0]);
+		if (environment) {
+			expect(refreshed).toMatchObject({ token: TOKENS[0], environment });
+		} else {
+			expect(refreshed).toBeUndefined();
+		}
+	});
 
 	it.each([
 		{ scenario: "the middle device fails", allFail: false, sent: 2, failed: 1, push: "sent" },

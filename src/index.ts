@@ -2,6 +2,7 @@ import { sendAlert, type ApnsResult } from "./apns";
 import { notifySecret, requireOwner, resolveBot } from "./auth";
 import {
 	deleteDevice,
+	deleteDeviceIfUnchanged,
 	deliveryForNotify,
 	groupInbox,
 	insertNotification,
@@ -122,7 +123,7 @@ async function notify(request: Request, env: Env): Promise<Response> {
 			} else {
 				failed += 1;
 				if (result.unregistered) {
-					await deleteDevice(env.DB, device.token);
+					await deleteDeviceIfUnchanged(env.DB, device);
 				}
 				console.error(
 					JSON.stringify({
